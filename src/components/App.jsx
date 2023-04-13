@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import styles from './App.module.css';
 import Searchbar from './Searchbar/Searchbar';
 import Loader from './Loader/Loader';
@@ -8,68 +8,96 @@ import ImageGallery from './ImageGallery/ImageGallery';
 import Modal from './Modal/Modal';
 
 
-export class App extends Component {
-  state = { 
-    search: "",
-    page: 1,
-    cards: [],
-    error: null,
-    isLoading: false,
-    showModal: false,
-    largeImageURL: "",
-    webformatURL: "",
-  } 
+export const App = () => {
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [cards, setCards] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState("");
+  
 
-  handleSubmit = (search) => {
-        if (search !== this.state.search) {
-            this.setState({ images: [], page: 1, search }, () => {
-                this.fetchSearch(search);
-            });
-        }
+  const onSubmit = () => {
+    if (search) {
+      const firstPage = 1;
+      setCards([]);
+      setPage(firstPage);
+      fetchSearch(firstPage);
+    }
+  };
+
+
+    
+
+
+  const handleSubmit = (event) => {
+    event.preventDeafault();
+        if (search.trim() === '') {
+      alert.error('Enter your search query');
+      return;
+    }
+    onSubmit(search);
+  };
+
+  const onInputChange = e => {
+    setSearch(e.target.value.toLowerCase());
   };
   
-  fetchSearch = async (valueSearch) => {
-    this.setState({ isLoading: true, error: null });
+  const fetchSearch = async (numPage) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      const response = await fetchPhoto(valueSearch, this.state.page);
-      this.setState((prevState) => ({
-        cards: [...prevState.cards, ...response]
-      }));
+      const response = await fetchPhoto(search, numPage);
+      const dataArray = [];
+      response.map(({ id, webformatURL, largeImageURL }) =>
+        dataArray.push({ id, webformatURL, largeImageURL })
+      );
+
+      if (dataArray.length === 0) {
+        return dataArray;
+      }
+      setCards(prevState => [...prevState, ...response]
+      );
     } catch (error) {
-      this.setState({ error: error });
+      setError(error);
     } finally {
-      setTimeout(() => this.setState({ isLoading: false }) , 600);
+      setTimeout(() => setIsLoading( false ) , 600);
     }
   }
 
-  handleButton = () => {
-    this.setState({ page: this.state.page + 1 }, () => {
-      this.fetchSearch(this.state.search);
-    });
+  const handleButton = () => {
+    setPage(page + 1);
+      fetchSearch(page + 1);
   }
 
-  handleShow = (url) => {
-    this.setState({ showModal: true, largeImageURL: url });
+  const handleShow = (url) => {
+    setShowModal(true);
+    setLargeImageURL(url);
   }
 
-  handleClose = () => {
-    this.setState({ showModal: false, largeImageURL: "" });
+  const handleClose = () => {
+    setShowModal(false);
+    setLargeImageURL("");
   }
   
-  render() { 
-    const { cards, isLoading, largeImageURL, showModal } = this.state;
+  
     return (
       <div className={styles.App}>
-        <Searchbar onSubmit={this.handleSubmit} />
-        <ImageGallery cards={cards} onShow={this.handleShow} />
+        <Searchbar
+          onSubmit={handleSubmit}
+          onInputChange={onInputChange}
+          search={search}
+        />
+        <ImageGallery cards={cards} onShow={handleShow} />
         {isLoading && <Loader />}
         {cards.length > 0 && !isLoading ? (
-          <Button onClick={this.handleButton} />) : ("")}
+          <Button onClick={handleButton} />) : ("")}
         {showModal && (
-          <Modal onClose={this.handleClose} image={largeImageURL} />)}
+          <Modal onClose={handleClose} image={largeImageURL} />)}
       </div>
     );
   }
-}
+
  
 
