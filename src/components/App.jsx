@@ -1,21 +1,27 @@
 import React, { useState } from 'react';
-import styles from './App.module.css';
-import Searchbar from './Searchbar/Searchbar';
-import Loader from './Loader/Loader';
+import Notiflix from "notiflix";
+
 import { fetchPhoto } from 'API/api';
+
 import Button from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
+import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
+import Searchbar from './Searchbar/Searchbar';
+
+
+import styles from './App.module.css';
 
 
 export const App = () => {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
   const [cards, setCards] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const [largeImageURL, setLargeImageURL] = useState("");
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  
   
 
   const onSubmit = () => {
@@ -28,21 +34,21 @@ export const App = () => {
   };
 
 
-    
+  const onInputChange = e => {
+    setSearch(e.target.value.toLowerCase());
+  };
 
 
-  const handleSubmit = (event) => {
-    event.preventDeafault();
-        if (search.trim() === '') {
-      alert.error('Enter your search query');
+  const handleSubmit = event => {
+    event.preventDefault();
+    if (search.trim() === '') {
+      Notiflix.Notify.info('You have not entered a query');
       return;
     }
     onSubmit(search);
   };
 
-  const onInputChange = e => {
-    setSearch(e.target.value.toLowerCase());
-  };
+  
   
   const fetchSearch = async (numPage) => {
     setIsLoading(true);
@@ -84,8 +90,9 @@ export const App = () => {
   
     return (
       <div className={styles.App}>
+        {error && <p>Something went wrong: {error.message}</p>}
         <Searchbar
-          onSubmit={handleSubmit}
+          handleSubmit={handleSubmit}
           onInputChange={onInputChange}
           search={search}
         />

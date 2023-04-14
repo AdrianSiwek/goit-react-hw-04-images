@@ -1,40 +1,21 @@
 import PropTypes from "prop-types";
-import React, { Component } from 'react';
+import React from 'react';
 import styles from './Searchbar.module.css';
-import Notiflix from "notiflix";
-
-class Searchbar extends Component {
-  state = { 
-    search: '',
-  } 
 
 
-  handleChangeInput = (event) => {
-    this.setState({ search: event.target.value.toLowerCase() });
-  }
+const Searchbar = ({handleSubmit, onInputChange, search}) =>  {
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    if (this.state.search.trim() === '') {
-      Notiflix.Notify.info('You have not entered a query')
-      return;
-    }
-    this.props.onSubmit(this.state.search)
-  }
-
-  
-  render() { 
     return (
       <header className={styles.Searchbar}>
-                <form className={styles.SearchForm} onSubmit={this.handleSubmit}>
+                <form className={styles.SearchForm} onSubmit={handleSubmit}>
                     <input
-                        onChange={this.handleChangeInput}
+                        onChange={onInputChange}
                         className={styles.SearchFormInput}
                         type="text"
                         autoComplete="off"
                         autoFocus
                         placeholder="Search images and photos"
-                        value={this.state.search}
+                        value={search}
                     />
                     <button type="submit" className={styles.SearchFormButton}>&#x1F50D;
                         <span className={styles.SearchFormButtonLabel}>
@@ -45,10 +26,12 @@ class Searchbar extends Component {
             </header>
     );
   }
-}
+
 
 Searchbar.propTypes = {
-    onSubmit: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  onInputChange: PropTypes.func.isRequired,
+  search: PropTypes.string.isRequired,
 };
  
 export default Searchbar;
